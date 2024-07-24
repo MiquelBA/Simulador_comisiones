@@ -298,10 +298,12 @@
         }
 
         function switchCurrency() {
+            resetFields();
             loadSalesTable();
         }
 
         function switchLanguage(lang) {
+            resetFields();
             const title = document.getElementById('title');
             const instructions = document.getElementById('instructions');
             const calculateButton = document.getElementById('calculateButton');

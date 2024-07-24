@@ -26,19 +26,35 @@
         }
         .header {
             display: flex;
-            flex-direction: column;
-            align-items: flex-start;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 20px;
         }
         .logo {
             max-height: 50px;
-            margin-bottom: 10px;
         }
         h1 {
             font-size: 24px;
             color: #333;
             margin: 0;
-            text-align: left;
+        }
+        .selectors {
+            display: flex;
+            align-items: center;
+        }
+        .selector {
+            margin-left: 20px;
+            display: flex;
+            align-items: center;
+        }
+        .selector label {
+            margin-right: 5px;
+            font-size: 16px;
+        }
+        .selector select {
+            padding: 4px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
         }
         .instructions {
             border: 1px solid #ccc;
@@ -103,11 +119,6 @@
             border: 1px solid #ddd;
             border-radius: 4px;
         }
-        select {
-            padding: 4px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
         button {
             display: block;
             margin: 20px auto 10px;
@@ -145,10 +156,28 @@
 <body>
     <div class="container">
         <div class="header">
-            <img src="logo_ep_horitzontal.svg" alt="Easypromos Logo" class="logo">
-            <h1>Simulador de Comisiones</h1>
+            <div>
+                <img src="logo_ep_horitzontal.svg" alt="Easypromos Logo" class="logo">
+                <h1 id="title">Simulador de Comisiones</h1>
+            </div>
+            <div class="selectors">
+                <div class="selector">
+                    <label id="languageLabel" for="languageSelector">Idioma:</label>
+                    <select id="languageSelector" onchange="switchLanguage(this.value)">
+                        <option value="es">Español</option>
+                        <option value="en">English</option>
+                    </select>
+                </div>
+                <div class="selector">
+                    <label id="currencyLabel" for="currencySelector">Moneda:</label>
+                    <select id="currencySelector" onchange="switchCurrency()">
+                        <option value="€">Euro (€)</option>
+                        <option value="$">Dollar ($)</option>
+                    </select>
+                </div>
+            </div>
         </div>
-        <div class="instructions">
+        <div class="instructions" id="instructions">
             <h2>Instrucciones:</h2>
             <div class="instruction-item">
                 <span>1. Selecciona tu nivel de comisión:</span>
@@ -163,19 +192,19 @@
         <table>
             <thead>
                 <tr>
-                    <th>Tipo de Licencia</th>
-                    <th>Enero</th>
-                    <th>Febrero</th>
-                    <th>Marzo</th>
-                    <th>Abril</th>
-                    <th>Mayo</th>
-                    <th>Junio</th>
-                    <th>Julio</th>
-                    <th>Agosto</th>
-                    <th>Septiembre</th>
-                    <th>Octubre</th>
-                    <th>Noviembre</th>
-                    <th>Diciembre</th>
+                    <th id="licenseTypeHeader">Tipo de Licencia</th>
+                    <th id="month1">Enero</th>
+                    <th id="month2">Febrero</th>
+                    <th id="month3">Marzo</th>
+                    <th id="month4">Abril</th>
+                    <th id="month5">Mayo</th>
+                    <th id="month6">Junio</th>
+                    <th id="month7">Julio</th>
+                    <th id="month8">Agosto</th>
+                    <th id="month9">Septiembre</th>
+                    <th id="month10">Octubre</th>
+                    <th id="month11">Noviembre</th>
+                    <th id="month12">Diciembre</th>
                 </tr>
             </thead>
             <tbody id="salesTable">
@@ -183,7 +212,7 @@
             </tbody>
             <tfoot>
                 <tr>
-                    <th>Comisión por Mes (€)</th>
+                    <th id="commissionHeader">Comisión por Mes</th>
                     <td id="commissionEnero"></td>
                     <td id="commissionFebrero"></td>
                     <td id="commissionMarzo"></td>
@@ -199,12 +228,12 @@
                 </tr>
             </tfoot>
         </table>
-        <button onclick="calculateCommissions()">Calcular Comisiones</button>
-        <div class="reset-link" onclick="resetFields()">Borrar Cantidades</div>
+        <button id="calculateButton" onclick="calculateCommissions()">Calcular Comisiones</button>
+        <div class="reset-link" id="resetLink" onclick="resetFields()">Borrar Cantidades</div>
         <div id="results"></div>
     </div>
     <script>
-        const salesData = {
+        const salesDataEUR = {
             "Premium mensual": 149,
             "Marca Blanca mensual": 349,
             "Premium anual": 1490,
@@ -213,24 +242,119 @@
             "Corporate plus anual": 10000
         };
 
-        const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-        const licenses = Object.keys(salesData);
+        const salesDataUSD = {
+            "Monthly Premium": 199,
+            "Monthly White Label": 399,
+            "Annual Premium": 1999,
+            "Annual White Label": 3999,
+            "Annual Corporate Plan": 6000,
+            "Annual Corporate Plus Plan": 10000
+        };
+
+        let salesData = salesDataEUR;
+
+        const monthsEs = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+        const monthsEn = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        const licensesEs = Object.keys(salesDataEUR);
+        const licensesEn = Object.keys(salesDataUSD);
 
         document.addEventListener('DOMContentLoaded', () => {
+            loadSalesTable();
+        });
+
+        function loadSalesTable() {
             const salesTable = document.getElementById('salesTable');
+            salesTable.innerHTML = ''; // Clear previous rows
+            const licenses = salesData === salesDataEUR ? licensesEs : licensesEn;
             licenses.forEach(license => {
                 const row = document.createElement('tr');
-                const rowClass = license.includes('mensual') ? 'monthly' : 'annual';
+                const rowClass = license.includes('mensual') || license.includes('Monthly') ? 'monthly' : 'annual';
                 const licensePrice = salesData[license];
-                row.innerHTML = `<td class="${rowClass}"><span class="license-name">${license}</span> (€${licensePrice})</td>` + months.map(month => `<td><input type="number" min="0" data-license="${license}" data-month="${month}" class="${rowClass}"></td>`).join('');
+                row.innerHTML = `<td class="${rowClass}"><span class="license-name">${license}</span> (${document.getElementById('currencySelector').value}${formatNumber(licensePrice, 0)})</td>` + monthsEs.map(month => `<td><input type="number" min="0" data-license="${license}" data-month="${month}" class="${rowClass}"></td>`).join('');
                 salesTable.appendChild(row);
             });
-        });
+        }
+
+        function switchCurrency() {
+            const currency = document.getElementById('currencySelector').value;
+            salesData = currency === '€' ? salesDataEUR : salesDataUSD;
+            loadSalesTable();
+        }
+
+        function switchLanguage(lang) {
+            const title = document.getElementById('title');
+            const instructions = document.getElementById('instructions');
+            const commissionHeaders = document.querySelectorAll('tfoot th');
+            const calculateButton = document.getElementById('calculateButton');
+            const licenseTypeHeader = document.getElementById('licenseTypeHeader');
+            const commissionHeader = document.getElementById('commissionHeader');
+            const currencySelector = document.getElementById('currencySelector');
+            const languageLabel = document.getElementById('languageLabel');
+            const currencyLabel = document.getElementById('currencyLabel');
+            const resetLink = document.getElementById('resetLink');
+            
+            if (lang === 'en') {
+                title.innerText = 'Commission Simulator';
+                instructions.innerHTML = `
+                    <h2>Instructions:</h2>
+                    <div class="instruction-item">
+                        <span>1. Select your commission level:</span>
+                        <select id="commissionLevel">
+                            <option value="0.20">20%</option>
+                            <option value="0.25">25%</option>
+                            <option value="0.30">30%</option>
+                        </select>
+                    </div>
+                    <p>2. Enter the number of licenses you will purchase or renew each month.</p>`;
+                commissionHeaders[0].innerText = 'Commission per Month';
+                calculateButton.innerText = 'Calculate Commissions';
+                licenseTypeHeader.innerText = 'License Type';
+                commissionHeader.innerText = 'Commission per Month';
+                monthsEn.forEach((month, index) => {
+                    document.getElementById(`month${index + 1}`).innerText = month;
+                });
+                currencySelector.options[0].text = 'Euro (€)';
+                currencySelector.options[1].text = 'Dollar ($)';
+                languageLabel.innerText = 'Language:';
+                currencyLabel.innerText = 'Currency:';
+                resetLink.innerText = 'Reset Quantities';
+            } else {
+                title.innerText = 'Simulador de Comisiones';
+                instructions.innerHTML = `
+                    <h2>Instrucciones:</h2>
+                    <div class="instruction-item">
+                        <span>1. Selecciona tu nivel de comisión:</span>
+                        <select id="commissionLevel">
+                            <option value="0.20">20%</option>
+                            <option value="0.25">25%</option>
+                            <option value="0.30">30%</option>
+                        </select>
+                    </div>
+                    <p>2. Introduce el número de licencias que comprarás o renovarás cada mes.</p>`;
+                commissionHeaders[0].innerText = 'Comisión por Mes';
+                calculateButton.innerText = 'Calcular Comisiones';
+                licenseTypeHeader.innerText = 'Tipo de Licencia';
+                commissionHeader.innerText = 'Comisión por Mes';
+                monthsEs.forEach((month, index) => {
+                    document.getElementById(`month${index + 1}`).innerText = month;
+                });
+                currencySelector.options[0].text = 'Euro (€)';
+                currencySelector.options[1].text = 'Dollar ($)';
+                languageLabel.innerText = 'Idioma:';
+                currencyLabel.innerText = 'Moneda:';
+                resetLink.innerText = 'Borrar Cantidades';
+            }
+            loadSalesTable();
+        }
 
         function calculateCommissions() {
             const commissionRate = parseFloat(document.getElementById('commissionLevel').value);
+            const currency = document.getElementById('currencySelector').value;
+            const lang = document.getElementById('languageSelector').value;
             let monthlyCommissions = Array(12).fill(0);
             let totalAnnualCommission = 0;
+
+            const months = lang === 'es' ? monthsEs : monthsEn;
 
             months.forEach((month, monthIndex) => {
                 let totalAmount = 0;
@@ -248,11 +372,12 @@
             });
 
             monthlyCommissions.forEach((commission, index) => {
-                document.getElementById(`commission${months[index]}`).innerText = `€${commission.toFixed(2)}`;
+                document.getElementById(`commission${months[index]}`).innerText = `${currency}${formatNumber(commission)}`;
                 totalAnnualCommission += commission;
             });
 
-            document.getElementById('results').innerHTML = `<h2>Total Comisión Anual: €${totalAnnualCommission.toFixed(2)}</h2><p>Cálculos basados en el ${commissionRate * 100}% de comisión.</p>`;
+            const results = document.getElementById('results');
+            results.innerHTML = `<h2>${lang === 'es' ? 'Total Comisión Anual' : 'Total Annual Commission'}: ${currency}${formatNumber(totalAnnualCommission)}</h2><p>${lang === 'es' ? 'Cálculos basados en el' : 'Calculations based on'} ${commissionRate * 100}% ${lang === 'es' ? 'de comisión' : 'commission'}.</p>`;
         }
 
         function resetFields() {
@@ -265,6 +390,11 @@
             });
 
             document.getElementById('results').innerHTML = '';
+        }
+
+        function formatNumber(number, decimals = 2) {
+            const lang = document.getElementById('languageSelector').value === 'es' ? 'es-ES' : 'en-US';
+            return number.toLocaleString(lang, { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
         }
     </script>
 </body>

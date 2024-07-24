@@ -233,30 +233,49 @@
         <div id="results"></div>
     </div>
     <script>
-        const salesDataEUR = {
-            "Premium mensual": 149,
-            "Marca Blanca mensual": 349,
-            "Premium anual": 1490,
-            "Marca Blanca anual": 3490,
-            "Corporate anual": 6000,
-            "Corporate plus anual": 10000
+        const data = {
+            "es": {
+                "€": {
+                    "Premium mensual": 149,
+                    "Marca Blanca mensual": 349,
+                    "Premium anual": 1490,
+                    "Marca Blanca anual": 3490,
+                    "Corporate anual": 6000,
+                    "Corporate plus anual": 10000
+                },
+                "$": {
+                    "Premium mensual": 199,
+                    "Marca Blanca mensual": 399,
+                    "Premium anual": 1999,
+                    "Marca Blanca anual": 3999,
+                    "Corporate anual": 6000,
+                    "Corporate plus anual": 10000
+                }
+            },
+            "en": {
+                "€": {
+                    "Monthly Premium": 149,
+                    "Monthly White Label": 349,
+                    "Annual Premium": 1490,
+                    "Annual White Label": 3490,
+                    "Annual Corporate Plan": 6000,
+                    "Annual Corporate Plus Plan": 10000
+                },
+                "$": {
+                    "Monthly Premium": 199,
+                    "Monthly White Label": 399,
+                    "Annual Premium": 1999,
+                    "Annual White Label": 3999,
+                    "Annual Corporate Plan": 6000,
+                    "Annual Corporate Plus Plan": 10000
+                }
+            }
         };
 
-        const salesDataUSD = {
-            "Monthly Premium": 199,
-            "Monthly White Label": 399,
-            "Annual Premium": 1999,
-            "Annual White Label": 3999,
-            "Annual Corporate Plan": 6000,
-            "Annual Corporate Plus Plan": 10000
-        };
-
-        let salesData = salesDataEUR;
+        let salesData = data["es"]["€"];
 
         const monthsEs = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
         const monthsEn = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-        const licensesEs = Object.keys(salesDataEUR);
-        const licensesEn = Object.keys(salesDataUSD);
 
         document.addEventListener('DOMContentLoaded', () => {
             loadSalesTable();
@@ -265,26 +284,26 @@
         function loadSalesTable() {
             const salesTable = document.getElementById('salesTable');
             salesTable.innerHTML = ''; // Clear previous rows
-            const licenses = salesData === salesDataEUR ? licensesEs : licensesEn;
-            licenses.forEach(license => {
+            const lang = document.getElementById('languageSelector').value;
+            const currency = document.getElementById('currencySelector').value;
+            salesData = data[lang][currency];
+            const months = lang === 'es' ? monthsEs : monthsEn;
+            Object.keys(salesData).forEach(license => {
                 const row = document.createElement('tr');
-                const rowClass = license.includes('mensual') || license.includes('Monthly') ? 'monthly' : 'annual';
+                const rowClass = license.toLowerCase().includes('mensual') || license.toLowerCase().includes('monthly') ? 'monthly' : 'annual';
                 const licensePrice = salesData[license];
-                row.innerHTML = `<td class="${rowClass}"><span class="license-name">${license}</span> (${document.getElementById('currencySelector').value}${formatNumber(licensePrice, 0)})</td>` + monthsEs.map(month => `<td><input type="number" min="0" data-license="${license}" data-month="${month}" class="${rowClass}"></td>`).join('');
+                row.innerHTML = `<td class="${rowClass}"><span class="license-name">${license}</span> (${currency}${formatNumber(licensePrice, 0)})</td>` + months.map((month, index) => `<td><input type="number" min="0" data-license="${license}" data-month="${monthsEs[index]}" class="${rowClass}"></td>`).join('');
                 salesTable.appendChild(row);
             });
         }
 
         function switchCurrency() {
-            const currency = document.getElementById('currencySelector').value;
-            salesData = currency === '€' ? salesDataEUR : salesDataUSD;
             loadSalesTable();
         }
 
         function switchLanguage(lang) {
             const title = document.getElementById('title');
             const instructions = document.getElementById('instructions');
-            const commissionHeaders = document.querySelectorAll('tfoot th');
             const calculateButton = document.getElementById('calculateButton');
             const licenseTypeHeader = document.getElementById('licenseTypeHeader');
             const commissionHeader = document.getElementById('commissionHeader');
@@ -306,7 +325,6 @@
                         </select>
                     </div>
                     <p>2. Enter the number of licenses you will purchase or renew each month.</p>`;
-                commissionHeaders[0].innerText = 'Commission per Month';
                 calculateButton.innerText = 'Calculate Commissions';
                 licenseTypeHeader.innerText = 'License Type';
                 commissionHeader.innerText = 'Commission per Month';
@@ -331,7 +349,6 @@
                         </select>
                     </div>
                     <p>2. Introduce el número de licencias que comprarás o renovarás cada mes.</p>`;
-                commissionHeaders[0].innerText = 'Comisión por Mes';
                 calculateButton.innerText = 'Calcular Comisiones';
                 licenseTypeHeader.innerText = 'Tipo de Licencia';
                 commissionHeader.innerText = 'Comisión por Mes';
@@ -359,7 +376,7 @@
             months.forEach((month, monthIndex) => {
                 let totalAmount = 0;
 
-                document.querySelectorAll(`input[data-month="${month}"]`).forEach(input => {
+                document.querySelectorAll(`input[data-month="${monthsEs[monthIndex]}"]`).forEach(input => {
                     const licenseType = input.dataset.license;
                     const quantity = parseInt(input.value) || 0;
                     const licensePrice = salesData[licenseType];
@@ -372,7 +389,7 @@
             });
 
             monthlyCommissions.forEach((commission, index) => {
-                document.getElementById(`commission${months[index]}`).innerText = `${currency}${formatNumber(commission)}`;
+                document.getElementById(`commission${monthsEs[index]}`).innerText = `${currency}${formatNumber(commission)}`;
                 totalAnnualCommission += commission;
             });
 

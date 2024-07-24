@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Comisiones</title>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            height: 100vh;
+            background-color: #f7f7f7;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            max-width: 90vw;
+            margin-top: 20px;
+        }
+        .header {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+        .logo {
+            max-height: 50px;
+            margin-bottom: 10px;
+        }
+        h1 {
+            font-size: 24px;
+            color: #333;
+            margin: 0;
+            text-align: left;
+        }
+        .instructions {
+            border: 1px solid #ccc;
+            background-color: #fffacd;
+            padding: 10px;
+            margin-bottom: 20px;
+            max-width: 500px;
+        }
+        .instructions h2 {
+            margin: 0 0 10px 0;
+            font-size: 18px;
+            color: #333;
+        }
+        .instruction-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .instruction-item select {
+            margin-left: 10px;
+        }
+        .explanation {
+            margin-top: 10px;
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #0073e6;
+            color: #fff;
+            padding: 10px;
+        }
+        td {
+            padding: 8px;
+            text-align: center;
+            background-color: #f9f9f9;
+        }
+        td:first-child {
+            text-align: left;
+        }
+        .license-name {
+            font-weight: bold;
+        }
+        .monthly {
+            background-color: #e6f7ff;
+        }
+        .annual {
+            background-color: #fff0f0;
+        }
+        input[type="number"] {
+            width: 50px;
+            padding: 4px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        select {
+            padding: 4px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            display: block;
+            margin: 20px auto 10px;
+            padding: 10px 20px;
+            background-color: #0073e6;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #005bb5;
+        }
+        #results {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 18px;
+            color: #333;
+        }
+        .reset-link {
+            display: block;
+            text-align: center;
+            margin-top: 10px;
+            font-size: 14px;
+            color: #0073e6;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        .reset-link:hover {
+            color: #005bb5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="logo_ep_horitzontal.svg" alt="Easypromos Logo" class="logo">
+            <h1>Simulador de Comisiones</h1>
+        </div>
+        <div class="instructions">
+            <h2>Instrucciones:</h2>
+            <div class="instruction-item">
+                <span>1. Selecciona tu nivel de comisión:</span>
+                <select id="commissionLevel">
+                    <option value="0.20">20%</option>
+                    <option value="0.25">25%</option>
+                    <option value="0.30">30%</option>
+                </select>
+            </div>
+            <p>2. Introduce el número de licencias que comprarás o renovarás cada mes.</p>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Tipo de Licencia</th>
+                    <th>Enero</th>
+                    <th>Febrero</th>
+                    <th>Marzo</th>
+                    <th>Abril</th>
+                    <th>Mayo</th>
+                    <th>Junio</th>
+                    <th>Julio</th>
+                    <th>Agosto</th>
+                    <th>Septiembre</th>
+                    <th>Octubre</th>
+                    <th>Noviembre</th>
+                    <th>Diciembre</th>
+                </tr>
+            </thead>
+            <tbody id="salesTable">
+                <!-- Filas de tipos de licencia generadas por JavaScript -->
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th>Comisión por Mes (€)</th>
+                    <td id="commissionEnero"></td>
+                    <td id="commissionFebrero"></td>
+                    <td id="commissionMarzo"></td>
+                    <td id="commissionAbril"></td>
+                    <td id="commissionMayo"></td>
+                    <td id="commissionJunio"></td>
+                    <td id="commissionJulio"></td>
+                    <td id="commissionAgosto"></td>
+                    <td id="commissionSeptiembre"></td>
+                    <td id="commissionOctubre"></td>
+                    <td id="commissionNoviembre"></td>
+                    <td id="commissionDiciembre"></td>
+                </tr>
+            </tfoot>
+        </table>
+        <button onclick="calculateCommissions()">Calcular Comisiones</button>
+        <div class="reset-link" onclick="resetFields()">Borrar Cantidades</div>
+        <div id="results"></div>
+    </div>
+    <script>
+        const salesData = {
+            "Premium mensual": 149,
+            "Marca Blanca mensual": 349,
+            "Premium anual": 1490,
+            "Marca Blanca anual": 3490,
+            "Corporate anual": 6000,
+            "Corporate plus anual": 10000
+        };
+
+        const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+        const licenses = Object.keys(salesData);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const salesTable = document.getElementById('salesTable');
+            licenses.forEach(license => {
+                const row = document.createElement('tr');
+                const rowClass = license.includes('mensual') ? 'monthly' : 'annual';
+                const licensePrice = salesData[license];
+                row.innerHTML = `<td class="${rowClass}"><span class="license-name">${license}</span> (€${licensePrice})</td>` + months.map(month => `<td><input type="number" min="0" data-license="${license}" data-month="${month}" class="${rowClass}"></td>`).join('');
+                salesTable.appendChild(row);
+            });
+        });
+
+        function calculateCommissions() {
+            const commissionRate = parseFloat(document.getElementById('commissionLevel').value);
+            let monthlyCommissions = Array(12).fill(0);
+            let totalAnnualCommission = 0;
+
+            months.forEach((month, monthIndex) => {
+                let totalAmount = 0;
+
+                document.querySelectorAll(`input[data-month="${month}"]`).forEach(input => {
+                    const licenseType = input.dataset.license;
+                    const quantity = parseInt(input.value) || 0;
+                    const licensePrice = salesData[licenseType];
+
+                    totalAmount += quantity * licensePrice;
+                });
+
+                const commission = totalAmount * commissionRate;
+                monthlyCommissions[monthIndex] = commission;
+            });
+
+            monthlyCommissions.forEach((commission, index) => {
+                document.getElementById(`commission${months[index]}`).innerText = `€${commission.toFixed(2)}`;
+                totalAnnualCommission += commission;
+            });
+
+            document.getElementById('results').innerHTML = `<h2>Total Comisión Anual: €${totalAnnualCommission.toFixed(2)}</h2><p>Cálculos basados en el ${commissionRate * 100}% de comisión.</p>`;
+        }
+
+        function resetFields() {
+            document.querySelectorAll('input[type="number"]').forEach(input => {
+                input.value = '';
+            });
+
+            document.querySelectorAll('tfoot td').forEach(td => {
+                td.innerText = '';
+            });
+
+            document.getElementById('results').innerHTML = '';
+        }
+    </script>
+</body>
+</html>

@@ -61,7 +61,7 @@
             background-color: #fffacd;
             padding: 10px;
             margin-bottom: 20px;
-            max-width: 500px;
+            max-width: 550px;
         }
         .instructions h2 {
             margin: 0 0 10px 0;
@@ -181,7 +181,7 @@
             <h2>Instrucciones:</h2>
             <div class="instruction-item">
                 <span>1. Selecciona tu nivel de comisión:</span>
-                <select id="commissionLevel">
+                <select id="commissionLevel" onchange="calculateCommissions()">
                     <option value="0.20">20%</option>
                     <option value="0.25">25%</option>
                     <option value="0.30">30%</option>
@@ -228,7 +228,6 @@
                 </tr>
             </tfoot>
         </table>
-        <button id="calculateButton" onclick="calculateCommissions()">Calcular Comisiones</button>
         <div class="reset-link" id="resetLink" onclick="resetFields()">Borrar Cantidades</div>
         <div id="results"></div>
     </div>
@@ -292,7 +291,7 @@
                 const row = document.createElement('tr');
                 const rowClass = license.toLowerCase().includes('mensual') || license.toLowerCase().includes('monthly') ? 'monthly' : 'annual';
                 const licensePrice = salesData[license];
-                row.innerHTML = `<td class="${rowClass}"><span class="license-name">${license}</span> (${currency}${formatNumber(licensePrice, 0)})</td>` + months.map((month, index) => `<td><input type="number" min="0" data-license="${license}" data-month="${monthsEs[index]}" class="${rowClass}"></td>`).join('');
+                row.innerHTML = `<td class="${rowClass}"><span class="license-name">${license}</span> (${currency}${formatNumber(licensePrice, 0)})</td>` + months.map((month, index) => `<td><input type="number" min="0" data-license="${license}" data-month="${monthsEs[index]}" class="${rowClass}" oninput="calculateCommissions()"></td>`).join('');
                 salesTable.appendChild(row);
             });
         }
@@ -320,7 +319,7 @@
                     <h2>Instructions:</h2>
                     <div class="instruction-item">
                         <span>1. Select your commission level:</span>
-                        <select id="commissionLevel">
+                        <select id="commissionLevel" onchange="calculateCommissions()">
                             <option value="0.20">20%</option>
                             <option value="0.25">25%</option>
                             <option value="0.30">30%</option>
@@ -344,7 +343,7 @@
                     <h2>Instrucciones:</h2>
                     <div class="instruction-item">
                         <span>1. Selecciona tu nivel de comisión:</span>
-                        <select id="commissionLevel">
+                        <select id="commissionLevel" onchange="calculateCommissions()">
                             <option value="0.20">20%</option>
                             <option value="0.25">25%</option>
                             <option value="0.30">30%</option>
